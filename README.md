@@ -33,6 +33,7 @@
  
  # Deep Learning Model
  <h1 align="center">
+  
 ![alt text](https://github.com/AnasHafi07/Articles-Classification/blob/main/objects/model.png)
   
  # Model Performance
