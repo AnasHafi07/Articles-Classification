@@ -31,7 +31,11 @@
 
  # EDA
  
+  * Data are loaded from given the URL: https://raw.githubusercontent.com/susanli2016/PyCon-Canada-2019-NLP-Tutorial/master/bbc-text.csv
+ 
  # Deep Learning Model
+ 
+  * The deep learning model are created with Sequential, the layers included in the model are Embedding, Bidirectional, LSTM, Dropout and Dense.
  <h1 align="center">
   
 ![alt text](https://github.com/AnasHafi07/Articles-Classification/blob/main/objects/model.png)
@@ -46,6 +50,8 @@
 
 
   ![alt text](https://github.com/AnasHafi07/Articles-Classification/blob/main/objects/score.png)
+  
+   * This accuracy that I got for this model is at 91%
  
  
 
