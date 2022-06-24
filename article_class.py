@@ -16,6 +16,17 @@ from datetime import datetime
 from module_for_article_class import ModelCreation
 import pickle
 from tensorflow.keras.utils import plot_model
+from tensorflow.keras.preprocessing.text import Tokenizer
+import json
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras import Input
+import matplotlib.pyplot as plt
+from tensorflow.keras.layers import Bidirectional,Embedding
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.model_selection import train_test_split
 
 #%% Statics
 URL_PATH = 'https://raw.githubusercontent.com/susanli2016/PyCon-Canada-2019-NLP-Tutorial/master/bbc-text.csv'
@@ -52,16 +63,20 @@ df.duplicated().sum()
 category_data = df['category']
 text_data = df['text']
 
+# Split the data into different variables
+
 cat_names = list(df['category'].unique())
 n_categories = len(cat_names)
 
 
 #%% STEP 3) DATA CLEANING
 
-df = df.drop_duplicates()
+df = df.drop_duplicates() # To remove duplicates
 
 cleaned_text = text_data.replace(to_replace='[^a-zA-Z]', value=' ',
                                  regex=True).str.lower().str.split()
+
+#Remove numbers, lowercase all and split the text
 
 #%% STEP 4) FEATURES SELECTION
 
@@ -70,16 +85,20 @@ cleaned_text = text_data.replace(to_replace='[^a-zA-Z]', value=' ',
 #%% STEP 5) PREPROCESSING
 
 vocab_size = 30000
+
+# We choose the vocab size to be 30000
+
+
 oov_token = 'OOV'
 
-from tensorflow.keras.preprocessing.text import Tokenizer
+
 
 tokenizer = Tokenizer(num_words = vocab_size,oov_token=oov_token)
 
 tokenizer.fit_on_texts(text_data)
 word_index = tokenizer.word_index
 
-import json
+
 token_json = tokenizer.to_json()
 
 with open(TOKENIZER_JSON_PATH,'w') as file:
@@ -91,25 +110,29 @@ train_sequences = tokenizer.texts_to_sequences(text_data)
 
 length_of_review = [len(i) for i in train_sequences]
 
-import numpy as np
+
 print(np.mean(length_of_review))
 
 max_len = 394
 
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+# Based on the max length of text
+
+
 
 padded_review = pad_sequences(train_sequences,maxlen=max_len,
                               padding='post',
                               truncating='post')
 
-from sklearn.preprocessing import OneHotEncoder
+
 ohe = OneHotEncoder(sparse = False)
 category_data = ohe.fit_transform(np.expand_dims(category_data, axis=-1))
+
+# We encode the targeted text file
 
 with open(ENCODER_PATH,'wb') as file:
     pickle.dump(ohe,file)
 
-from sklearn.model_selection import train_test_split
+
 X_train,X_test,y_train,y_test = train_test_split(padded_review,
                                                  category_data,
                                                  test_size=0.3,
@@ -120,11 +143,7 @@ X_train,X_test,y_train,y_test = train_test_split(padded_review,
 X_train = np.expand_dims(X_train,axis=-1)
 X_test = np.expand_dims(X_test,axis=-1)
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras import Input
-import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Bidirectional,Embedding
+
 
 model = Sequential()
 model.add(Input(shape=(394)))
@@ -168,21 +187,6 @@ plt.show()
 mc = ModelCreation()
 mc.model_evaluation(model,y_test, X_test)
 
-# from sklearn.metrics import classification_report,confusion_matrix
-# from sklearn.metrics import accuracy_score
-
-# y_true = y_test
-# y_pred = model.predict(X_test)
-
-# y_true = np.argmax(y_true,axis=1)
-# y_pred = np.argmax(y_pred,axis=1)
-
-
-# print(classification_report(y_true, y_pred))
-# print(accuracy_score(y_true, y_pred))
-# print(confusion_matrix(y_true, y_pred))
-
-# from tensorflow.keras.utils import plot_model
 
 plot_model(model)
 model.save(MODEL_PATH)
